@@ -1,0 +1,26 @@
+<h2>Résultats IMDB pour "<%= params[:movie_name] %>"</h2>
+
+<% if @results.empty? %>
+  <p>Aucun résultat trouvé.</p>
+<% else %>
+  <% @results.each do |movie| %>
+    <%# On affiche seulement les films ("feature") pour plus de clarté %>
+    <% if movie['q'] == 'feature' %>
+      <div class="movie-card">
+        <% if movie.dig('i', 'imageUrl').present? %>
+            <img src="<%= movie['i']['imageUrl'] %>" alt="Affiche de <%= movie['l'] %>" />
+        <% end %>
+        <div class="details">
+          <h3><%= movie['l'] %> (<%= movie['y'] %>)</h3>
+          <p>Avec : <%= movie['s'] %></p>
+          <%= form_with url: search_yts_path, method: :post do |form| %>
+            <%= form.hidden_field :imdb_id, value: movie['id'] %>
+            <%= form.submit "Chercher ce film sur YTS", class: "button" %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= link_to "Nouvelle recherche", root_path %>

@@ -1,0 +1,5 @@
+<h1>Rechercher un film</h1>
+<%= form_with url: display_imdb_results_path, method: :post do |form| %>
+  <%= form.text_field :movie_name, placeholder: "Ex: The Matrix" %>
+  <%= form.submit "Rechercher sur IMDB", class: "button" %>
+<% end %>

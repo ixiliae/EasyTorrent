@@ -1,0 +1,57 @@
+<h2>Résultats YTS pour l'ID IMDB : <%= @imdb_id %></h2>
+
+<% if @movies.any? %>
+  <div class="movies-list">
+    <% @movies.each do |movie| %>
+      <div class="movie-card">
+        <img src="<%= movie['medium_cover_image'] %>" alt="Pochette de <%= movie['title'] %>" class="movie-cover">
+        <div class="movie-details">
+          <h3><%= movie['title_long'] %></h3>
+          <p><strong>Année :</strong> <%= movie['year'] %></p>
+          <p><strong>Note :</strong> <%= movie['rating'] %> / 10</p>
+          <p><strong>Synopsis :</strong> <%= movie['synopsis'] || 'Non disponible' %></p>
+          
+          <%= link_to "Voir les Torrents", 
+                      display_torrents_path(yts_movie_url: movie['url']), 
+                      class: 'btn-view-torrents' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <p>Aucun film trouvé sur YTS pour cet ID IMDB.</p>
+<% end %>
+
+<style>
+  .movies-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .movie-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    gap: 15px;
+  }
+  .movie-cover {
+    width: 150px;
+    height: auto;
+  }
+  .movie-details {
+    flex: 1;
+  }
+  .btn-view-torrents {
+    background-color: #008CBA;
+    color: white;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 4px;
+    margin-top: 10px;
+  }
+</style>

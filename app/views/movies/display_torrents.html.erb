@@ -1,0 +1,59 @@
+<h2>Torrents disponibles pour : <%= @movie_title %></h2>
+
+<table class="torrents-table">
+  <thead>
+    <tr>
+      <th>Qualité</th>
+      <th>Taille</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @torrents.each do |torrent| %>
+      <tr>
+        <td><%= torrent[:quality] %></td>
+        <td><%= torrent[:size] %></td>
+        <td>
+          <%= form_with url: add_torrent_path, method: :post do |form| %>
+            <%= form.hidden_field :magnet_url, value: torrent[:magnet_url] %>
+            <%= form.submit "Ajouter à torrent.homevallon.casa", class: "btn-download" %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= link_to "Nouvelle recherche", root_path, class: 'btn-new-search' %>
+
+<style>
+  .torrents-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  .torrents-table th, .torrents-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  .torrents-table th {
+    background-color: #f2f2f2;
+  }
+  .btn-download {
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .btn-new-search {
+    display: inline-block;
+    background-color: #008CBA;
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 4px;
+  }
+</style>
