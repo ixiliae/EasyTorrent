@@ -4,6 +4,10 @@ class MoviesController < ApplicationController
   require 'httparty'
   require 'nokogiri'
 
+  IMDB_ID_PATTERN = /\Att\d+\z/
+  YTS_MOVIE_URL_PATTERN = /\Ahttps:\/\/yts\.rs\/movie\/[a-z0-9\-]+\z/i
+  MAGNET_PREFIX = 'magnet:'
+
   # Action pour afficher le formulaire de recherche initial
   def search
   end
@@ -22,10 +26,16 @@ class MoviesController < ApplicationController
   # Action pour chercher le film sélectionné sur YTS
   def search_yts
     @imdb_id = params[:imdb_id]
+
+    unless @imdb_id =~ IMDB_ID_PATTERN
+      flash[:error] = "Identifiant IMDB invalide."
+      redirect_to root_path and return
+    end
+
     # L'API YTS officielle supporte la recherche par ID IMDB
-    yts_url = "https://yts.mx/api/v2/list_movies.json?query_term=#{@imdb_id}"
+    yts_url = "https://yts.rs/api/v2/search?q=#{@imdb_id}"
     response = HTTParty.get(yts_url)
-    @movies = response.parsed_response.dig('data', 'movies') || []
+    @movies = response.parsed_response['movies'] || []
 
     render :display_yts_results
   end
@@ -33,17 +43,22 @@ class MoviesController < ApplicationController
   # Action pour afficher les torrents pour un film YTS
   def display_torrents
     yts_movie_url = params[:yts_movie_url]
+
+    unless yts_movie_url =~ YTS_MOVIE_URL_PATTERN
+      flash[:error] = "URL de film invalide."
+      redirect_to root_path and return
+    end
+
     response = HTTParty.get(yts_movie_url)
     doc = Nokogiri::HTML(response.body)
 
     @movie_title = doc.css('div.movie-info div h1').text
-    @torrents = doc.css('.modal-torrent').map do |torrent_div|
+    @torrents = doc.css('div.torrent-qualities a[href^="magnet:"]').map do |link|
       {
-        quality: torrent_div.css('.modal-quality').text.strip,
-        size: torrent_div.css('p.quality-size').last.text.strip,
-        magnet_url: torrent_div.css('a.magnet-download').attr('href').value
+        quality: link.text.strip,
+        magnet_url: link['href']
       }
-    end
+    end.uniq { |h| h[:quality] }
 
     render :display_torrents
   end
@@ -51,8 +66,14 @@ class MoviesController < ApplicationController
   # Action pour envoyer le magnet au client Torrent
   def add_torrent
     magnet_url = params[:magnet_url]
+
+    unless magnet_url&.start_with?(MAGNET_PREFIX)
+      flash[:error] = "Lien magnet invalide."
+      redirect_to root_path and return
+    end
+
     transmission_url = TRANSMISSION_RPC_URL
-    
+
     # Premier appel pour obtenir le session ID
     begin
       initial_response = HTTParty.post(transmission_url, headers: { 'Content-Type' => 'application/json' })

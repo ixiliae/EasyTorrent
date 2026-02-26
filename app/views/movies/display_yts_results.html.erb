@@ -4,15 +4,13 @@
   <div class="movies-list">
     <% @movies.each do |movie| %>
       <div class="movie-card">
-        <img src="<%= movie['medium_cover_image'] %>" alt="Pochette de <%= movie['title'] %>" class="movie-cover">
+        <img src="https://yts.rs<%= movie['small_cover_image'] %>" alt="Pochette de <%= movie['title_long'] %>" class="movie-cover">
         <div class="movie-details">
           <h3><%= movie['title_long'] %></h3>
           <p><strong>Année :</strong> <%= movie['year'] %></p>
-          <p><strong>Note :</strong> <%= movie['rating'] %> / 10</p>
-          <p><strong>Synopsis :</strong> <%= movie['synopsis'] || 'Non disponible' %></p>
           
           <%= link_to "Voir les Torrents", 
-                      display_torrents_path(yts_movie_url: movie['url']), 
+                      display_torrents_path(yts_movie_url: "https://yts.rs/movie/#{movie['slug']}"), 
                       class: 'btn-view-torrents' %>
         </div>
       </div>
